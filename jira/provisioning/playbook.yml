@@ -1,0 +1,129 @@
+---
+- hosts: all
+  sudo: true
+  gather_facts: true
+  vars:
+    user_gui_password: $6$Zz7q20uyuUF$saXA3Lu/04kWSbRRW/RDIpE9BTmdD2qiI.rm2vvDxS6Ez.917n7.IiSU/nhCm5fj5vaJ1Y3S3coS5LooCwYfB1 #password=dev
+  tasks:
+    - name: "Updating repositories"
+      apt:
+        update_cache: yes
+    - name: "Upgrading packages"
+      apt:
+        upgrade: dist
+    - name: "Removing no longer required dependencies"
+      apt:
+        autoremove: yes
+ 
+    - name: Install add-apt-repostory
+      become: yes
+      apt: name=software-properties-common state=latest
+
+    - name: Add Oracle Java Repository
+      become: yes
+      apt_repository: repo='ppa:webupd8team/java'
+
+    - name: Accept Java 8 License
+      become: yes
+      debconf: name='oracle-java8-installer' question='shared/accepted-oracle-license-v1-1' value='true' vtype='select'
+
+    - name: Install Oracle Java 8
+      become: yes
+      sudo: yes
+      apt: name={{item}} state=latest
+      with_items:
+        - oracle-java8-installer
+        - ca-certificates
+        - oracle-java8-set-default
+
+    - name: Create a login user
+      user:
+        name: devuser
+        password: "{{user_gui_password}}"
+        groups:
+          - sudo
+          - root
+        state: present
+        shell: /bin/bash
+        system: yes
+        createhome: yes
+        home: /home/devuser
+
+      #install pexpect
+    - name: Install pip
+      apt:
+        name: python-pip
+        state: present
+
+    - name: install pexpect
+      pip:
+        name: pexpect
+      become: yes
+
+    - name: check if jira is installed
+      stat:
+        path: /etc/jira-installer.bin
+      register: jira_file
+
+    - name: Download jira
+      get_url:
+        url: https://product-downloads.atlassian.com/software/jira/downloads/atlassian-jira-software-7.13.1-x64.bin
+        dest: /etc/jira-installer.bin
+        mode: 0440
+      when: jira_file.stat.exists == False 
+
+    - name: make jira file executable
+      become: yes
+      shell: chmod +x /etc/jira-installer.bin
+
+    - name: Changing perm of "/etc/jira-installer.bin", adding "+x"
+      file: dest=/etc/jira-installer.bin mode=a+x
+
+    - name: check if jira is installed
+      stat:
+        path: /etc/atlassian
+      register: stat_result_jira
+
+    - name: install jira Express option on default ports
+      expect:
+        command: /etc/jira-installer.bin
+        responses:
+          'Enter' : ''
+          'Enter' : ''
+          'Express' : '2'
+          'installed' : '/etc/atlassian/jira'
+          'data' : '/etc/atlassian/application-data/jira'
+          # '8080' : ''
+          # 'Enter' : 'i'
+          # 'Yes' : 'y'
+        echo: yes
+      timeout: 60
+      when: stat_result_jira.stat.exists == False 
+
+    - name: Create a jira user
+      user:
+        name: jirausr
+        password: "{{user_gui_password}}"
+        groups:
+          - sudo
+          - root
+          - jira
+        state: present
+        shell: /bin/bash
+        system: yes
+        createhome: yes
+        home: /home/jirausr
+
+    #add permission to correct group
+    - name: change permission for jira group
+      become: yes
+      shell: chgrp jira /etc/atlassian/jira
+
+        #add permission to correct folder
+    - name: change permission for jira folder
+      become: yes
+      shell: chmod g+rwx /etc/atlassian/jira
+      
+    - name: chenge kerboard
+      become: yes
+      shell: loadkeys fr

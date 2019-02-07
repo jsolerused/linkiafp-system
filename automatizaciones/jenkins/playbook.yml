@@ -1,0 +1,12 @@
+---
+- hosts: all
+  sudo: true
+  gather_facts: true
+  vars:
+    jenkins_user: admin
+    jenkins_password: admoin
+    jenkins_host_ip: 192.168.1.60
+  tasks:
+    - debug: var=inventory_hostname
+    - debug: var=ansible_hostname
+    - debug: var=hostvars

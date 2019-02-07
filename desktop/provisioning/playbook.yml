@@ -1,0 +1,98 @@
+---
+- hosts: all
+  sudo: true
+  gather_facts: true
+  vars:
+    mysql_root_password: fart
+    user_gui_password: $6$Zz7q20uyuUF$saXA3Lu/04kWSbRRW/RDIpE9BTmdD2qiI.rm2vvDxS6Ez.917n7.IiSU/nhCm5fj5vaJ1Y3S3coS5LooCwYfB1 #password=dev
+  tasks:
+    - debug: var=inventory_hostname
+    - debug: var=ansible_hostname
+    - debug: var=hostvars
+
+
+    - name: "Updating repositories"
+      apt:
+        update_cache: yes
+    - name: "Upgrading packages"
+      apt:
+        upgrade: dist
+    - name: "Removing no longer required dependencies"
+      apt:
+        autoremove: yes
+ 
+    - name: Install add-apt-repostory
+      become: yes
+      apt: name=software-properties-common state=latest
+
+    - name: Add Oracle Java Repository
+      become: yes
+      apt_repository: repo='ppa:webupd8team/java'
+
+    - name: Accept Java 8 License
+      become: yes
+      debconf: name='oracle-java8-installer' question='shared/accepted-oracle-license-v1-1' value='true' vtype='select'
+
+    - name: Install Oracle Java 8
+      become: yes
+      sudo: yes
+      apt: name={{item}} state=latest
+      with_items:
+        - oracle-java8-installer
+        - ca-certificates
+        - oracle-java8-set-default
+
+    - name: Create a login user
+      user:
+        name: devuser
+        password: "{{user_gui_password}}"
+        groups:
+          - sudo
+          - root
+        state: present
+        shell: /bin/bash
+        system: yes
+        createhome: yes
+        home: /home/devuser
+    #install mysql
+    - name: Install MySQL and MySQL Workbench
+      apt: name={{item}} update_cache=yes cache_valid_time=3600 state=present
+      sudo: yes
+      with_items:
+        - python-mysqldb
+        - mysql-server
+        - mysql-workbench
+    #- name: copy cnf
+    #  copy: src=.my.cnf dest=~/.my.cnf owner=ubuntu mode=0644
+    #  sudo: yes
+    - name: Start the MySQL service
+      sudo: yes
+      service: 
+        name: mysql 
+        state: started
+        enabled: true
+    - name: update mysql root password for all root accounts
+      sudo: yes
+      mysql_user: 
+        name: root 
+        host: "{{item}}" 
+        password: "{{mysql_root_password}}"
+        login_user: root
+        login_password: "{{mysql_root_password}}"
+        check_implicit_admin: yes
+        priv: "*.*:ALL,GRANT"
+      with_items:
+        - "{{ansible_hostname}}"
+        - 127.0.0.1
+        - ::1
+        - localhost
+
+    - name: Install Netbeans, Apache2, git
+      become: yes
+      apt: name={{item}} update_cache=yes state=latest 
+      with_items:
+        - netbeans 
+        - apache2
+        - git
+        
+
