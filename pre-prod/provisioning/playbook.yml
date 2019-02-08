@@ -70,6 +70,13 @@
         name: mysql 
         state: started
         enabled: true
+
+    - name: Wait 300 seconds for port 3306 mysql
+      wait_for:
+        port: 3306
+        delay: 10
+
+
     - name: update mysql root password for all root accounts
       sudo: yes
       mysql_user: 
@@ -98,7 +105,29 @@
         - libtomcat7-java
         - tomcat7-common
         - tomcat7-examples
+
+    - name: Ansible create file with content example
+      copy:
+        dest: "/tmp/tomcat-users.xml"
+        content: |
+          <?xml version='1.0' encoding='utf-8'?>
+          <tomcat-users>
+              <role rolename="manager-gui"/>
+              <role rolename="manager-script"/>
+              <role rolename="tomcat"/>
+              <user username="tomcat" password="tomcat" roles="tomcat,manager-gui,manager-script"/>
+          </tomcat-users>
         
+    - name: Move new tomcat-users to tomcat7 folder
+      command: mv /tmp/tomcat-users.xml /etc/tomcat7
+
+    - name: RESTART TOMCAT7
+      sudo: yes
+      service: 
+        name: tomcat7 
+        state: restarted
+        enabled: true
+
     - name: chenge kerboard
       become: yes
       shell: loadkeys fr
