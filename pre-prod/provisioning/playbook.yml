@@ -3,7 +3,7 @@
   sudo: true
   gather_facts: true
   vars:
-    mysql_root_password: fart
+    mysql_root_password: 1Mn8iehsy67!42p
     user_gui_password: $6$Zz7q20uyuUF$saXA3Lu/04kWSbRRW/RDIpE9BTmdD2qiI.rm2vvDxS6Ez.917n7.IiSU/nhCm5fj5vaJ1Y3S3coS5LooCwYfB1 #password=dev
   tasks:
     - debug: var=inventory_hostname

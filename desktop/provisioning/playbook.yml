@@ -3,7 +3,7 @@
   sudo: true
   gather_facts: true
   vars:
-    mysql_root_password: fart
+    mysql_root_password: 1Mn8iehsy67!42p
     user_gui_password: $6$Zz7q20uyuUF$saXA3Lu/04kWSbRRW/RDIpE9BTmdD2qiI.rm2vvDxS6Ez.917n7.IiSU/nhCm5fj5vaJ1Y3S3coS5LooCwYfB1 #password=dev
   tasks:
     - debug: var=inventory_hostname
@@ -120,9 +120,41 @@
         dest: /etc
         remote_src: yes
 
+    - lineinfile:
+        path: "/etc/sts-4.1.1.RELEASE/configuration/config.ini"
+        regexp: '^osgi.instance.area.default='
+        line: 'osgi.instance.area.default=/home/devuser/workspace'
 
+    - name: Fix sts permissions
+      become: yes
+      file: dest=/etc/sts-4.1.1.RELEASE owner=root group=root mode=u=rwX,g=rX,o=rX recurse=yes
 
     # - name: copy launcher for STS to desktop
     #   copy:
     #     src: /etc/sts-4.1.1.RELEASE/SpringToolSuite4
     #     dest: /home/devuser/Desktop
+
+    - name: chenge kerboard
+      become: yes
+      shell: loadkeys fr
+
+
+
+
+
+
+
+#         modified:   p2/org.eclipse.equinox.p2.engine/profileRegistry/DefaultProfile.profile/.data/.settings/org.eclipse.equinox.p2.artifact.repository.prefs
+#   modified:   p2/org.eclipse.equinox.p2.engine/profileRegistry/DefaultProfile.profile/.data/.settings/org.eclipse.equinox.p2.metadata.repository.prefs
+
+# Untracked files:
+#   (use "git add <file>..." to include in what will be committed)
+
+#   configuration/.settings/
+#   configuration/org.eclipse.core.runtime/
+#   configuration/org.eclipse.equinox.app/
+#   configuration/org.eclipse.osgi/
+#   p2/org.eclipse.equinox.p2.engine/profileRegistry/DefaultProfile.profile/.data/.settings/org.eclipse.equinox.p2.ui.sdk.scheduler.prefs
+#   p2/org.eclipse.equinox.p2.engine/profileRegistry/DefaultProfile.profile/1549629215994.profile.gz
+#   p2/org.eclipse.equinox.p2.engine/profileRegistry/DefaultProfile.profile/1549629216589.profile.gz
+
