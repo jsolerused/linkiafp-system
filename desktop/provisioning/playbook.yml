@@ -87,12 +87,42 @@
         - ::1
         - localhost
 
-    - name: Install Netbeans, Apache2, git
+    - name: Install Apache2, git
       become: yes
       apt: name={{item}} update_cache=yes state=latest 
-      with_items:
-        - netbeans 
+      with_items: 
         - apache2
         - git
-        
+    #install Spring STS
 
+    #http://download.springsource.com/release/STS4/4.1.1.RELEASE/dist/e4.10/spring-tool-suite-4-4.1.1.RELEASE-e4.10.0-linux.gtk.x86_64.tar.gz
+
+    # - name: Download Sprinf Tool Suite 
+    #   get_url:
+    #     url: http://download.springsource.com/release/STS4/4.1.1.RELEASE/dist/e4.10/spring-tool-suite-4-4.1.1.RELEASE-e4.10.0-linux.gtk.x86_64.tar.gz
+    #     dest: /etc/STS-installer.tar.gz
+    #     mode: 0640
+
+    # - file:
+    #     path: /etc/STS-installer.tar.gz
+    #     owner: devuser
+    #     group: root
+    #     # when specifying mode using octal numbers, add a leading 0
+    #     mode: 0001
+
+    # - name: unzip tar.gz
+    #   become: yes
+    #   shell: tar -xvzf  /etc/STS-installer.tar.gz -C /etc
+
+    - name: download and unarchive STS
+      unarchive:
+        src: http://download.springsource.com/release/STS4/4.1.1.RELEASE/dist/e4.10/spring-tool-suite-4-4.1.1.RELEASE-e4.10.0-linux.gtk.x86_64.tar.gz
+        dest: /etc
+        remote_src: yes
+
+
+
+    # - name: copy launcher for STS to desktop
+    #   copy:
+    #     src: /etc/sts-4.1.1.RELEASE/SpringToolSuite4
+    #     dest: /home/devuser/Desktop
