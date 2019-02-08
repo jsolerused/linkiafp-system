@@ -94,6 +94,7 @@
       shell: cat /var/lib/jenkins/secrets/initialAdminPassword
       changed_when: false
       register: result
+      ignore_errors: yes
 
     - name: print init password jenkins
       debug:
