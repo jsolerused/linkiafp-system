@@ -3,7 +3,7 @@
   sudo: true
   gather_facts: true
   vars:
-    mysql_root_password: fart
+    mysql_root_password: 1Mn8iehsy67!42p
     user_gui_password: $6$Zz7q20uyuUF$saXA3Lu/04kWSbRRW/RDIpE9BTmdD2qiI.rm2vvDxS6Ez.917n7.IiSU/nhCm5fj5vaJ1Y3S3coS5LooCwYfB1 #password=dev
   tasks:
     - debug: var=inventory_hostname
@@ -87,12 +87,89 @@
         - ::1
         - localhost
 
-    - name: Install Netbeans, Apache2, git
+    - name: Install Apache2, git
       become: yes
       apt: name={{item}} update_cache=yes state=latest 
-      with_items:
-        - netbeans 
+      with_items: 
         - apache2
         - git
-        
+    #install Spring STS
+
+    #http://download.springsource.com/release/STS4/4.1.1.RELEASE/dist/e4.10/spring-tool-suite-4-4.1.1.RELEASE-e4.10.0-linux.gtk.x86_64.tar.gz
+
+    # - name: Download Sprinf Tool Suite 
+    #   get_url:
+    #     url: http://download.springsource.com/release/STS4/4.1.1.RELEASE/dist/e4.10/spring-tool-suite-4-4.1.1.RELEASE-e4.10.0-linux.gtk.x86_64.tar.gz
+    #     dest: /etc/STS-installer.tar.gz
+    #     mode: 0640
+
+    # - file:
+    #     path: /etc/STS-installer.tar.gz
+    #     owner: devuser
+    #     group: root
+    #     # when specifying mode using octal numbers, add a leading 0
+    #     mode: 0001
+
+    # - name: unzip tar.gz
+    #   become: yes
+    #   shell: tar -xvzf  /etc/STS-installer.tar.gz -C /etc
+
+    - name: download and unarchive STS
+      unarchive:
+        src: http://download.springsource.com/release/STS4/4.1.1.RELEASE/dist/e4.10/spring-tool-suite-4-4.1.1.RELEASE-e4.10.0-linux.gtk.x86_64.tar.gz
+        dest: /etc
+        remote_src: yes
+
+    - lineinfile:
+        path: "/etc/sts-4.1.1.RELEASE/configuration/config.ini"
+        regexp: '^osgi.instance.area.default='
+        line: 'osgi.instance.area.default=/home/devuser/workspace'
+
+    - name: Fix sts permissions
+      become: yes
+      file: dest=/etc/sts-4.1.1.RELEASE owner=root group=root mode=u=rwX,g=rX,o=rX recurse=yes
+
+    # - name: copy launcher for STS to desktop
+    #   copy:
+    #     src: /etc/sts-4.1.1.RELEASE/SpringToolSuite4
+    #     dest: /home/devuser/Desktop
+    - name: copy init.sql to remote host
+      copy:
+        src: ../../sql-script/init.sql
+        dest: /tmp/init.sql
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Import file.sql similar to mysql -u <username> -p <password> < hostname.sql
+      mysql_db:
+        login_user: root
+        login_password: "{{mysql_root_password}}"
+        state: import
+        name: all
+        target: /tmp/init.sql
+
+    - name: chenge kerboard
+      become: yes
+      shell: loadkeys fr
+
+
+
+
+
+
+
+#         modified:   p2/org.eclipse.equinox.p2.engine/profileRegistry/DefaultProfile.profile/.data/.settings/org.eclipse.equinox.p2.artifact.repository.prefs
+#   modified:   p2/org.eclipse.equinox.p2.engine/profileRegistry/DefaultProfile.profile/.data/.settings/org.eclipse.equinox.p2.metadata.repository.prefs
+
+# Untracked files:
+#   (use "git add <file>..." to include in what will be committed)
+
+#   configuration/.settings/
+#   configuration/org.eclipse.core.runtime/
+#   configuration/org.eclipse.equinox.app/
+#   configuration/org.eclipse.osgi/
+#   p2/org.eclipse.equinox.p2.engine/profileRegistry/DefaultProfile.profile/.data/.settings/org.eclipse.equinox.p2.ui.sdk.scheduler.prefs
+#   p2/org.eclipse.equinox.p2.engine/profileRegistry/DefaultProfile.profile/1549629215994.profile.gz
+#   p2/org.eclipse.equinox.p2.engine/profileRegistry/DefaultProfile.profile/1549629216589.profile.gz
 

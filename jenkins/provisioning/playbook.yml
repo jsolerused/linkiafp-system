@@ -88,12 +88,13 @@
         state: started
 
     - name: Wait Buffer
-      wait_for: timeout=30
+      wait_for: timeout=50
 
     - name: init password jenkin
       shell: cat /var/lib/jenkins/secrets/initialAdminPassword
       changed_when: false
       register: result
+      ignore_errors: yes
 
     - name: print init password jenkins
       debug:

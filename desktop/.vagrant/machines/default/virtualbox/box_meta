@@ -1,1 +1,1 @@
-{"name":"juguerre/ubuntu-desktop-18.04","version":"0.2","provider":"virtualbox","directory":"boxes/juguerre-VAGRANTSLASH-ubuntu-desktop-18.04/0.2/virtualbox"}
+{"name":"peru/ubuntu-18.04-desktop-amd64","version":"20190101.01","provider":"virtualbox","directory":"boxes/peru-VAGRANTSLASH-ubuntu-18.04-desktop-amd64/20190101.01/virtualbox"}
