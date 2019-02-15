@@ -71,7 +71,7 @@
         state: started
         enabled: true
 
-    - name: Wait 300 seconds for port 3306 mysql
+    - name: Wait 10 seconds for port 3306 mysql
       wait_for:
         port: 3306
         delay: 10

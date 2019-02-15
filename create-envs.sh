@@ -11,3 +11,6 @@ vagrant up --provision
 cd ..
 cd pre-prod
 vagrant up --provision
+cd ..
+cd prod
+vagrant up --provision
